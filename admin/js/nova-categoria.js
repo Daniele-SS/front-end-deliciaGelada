@@ -5,9 +5,11 @@
  * Versão: 1.0
  ***********************************************************************************/
 
+'use strict'
+
 const BASE_URL = 'http://localhost:3000/v1/fynix/deliciagelada'
 
-async function salvarNovaCategoria() {
+async function postCategoria(){
 
     // Captura os valores do formulário
     const nome      = document.getElementById('nomeCategoria').value.trim()
@@ -17,12 +19,18 @@ async function salvarNovaCategoria() {
     const id_status = ativa ? 1 : 2
 
     // Validação básica no frontend (RNF018)
-    if (nome == null || !nome || isNaN(nome)) {
+    if (nome == null || !nome || isNaN(nome) || nome.length > 50) {
         alert('O nome da categoria é obrigatório.')
+        return
+    } if (descricao == null || !descricao || isNaN(descricao) || descricao.length > 255) {
+        alert('A descrição da categoria é obrigatória.')
+        return
+    } if (foto == null) {
+        alert('A foto é um campo obrigatório.')
         return
     }
 
-    // Monta o corpo da requisição conforme o contrato da API
+    // Monta o corpo da requisição conforme a documentação da API
     const body = {
         nome: nome,
         descricao: descricao,
@@ -56,4 +64,43 @@ async function salvarNovaCategoria() {
         console.error('Erro na requisição:', erro)
         alert('Não foi possível conectar ao servidor. Verifique se o backend está rodando.')
     }
+}
+
+
+async function getListarCategoria(){
+    const response = await fetch(BASE_URL)
+
+    if(!response.ok) throw new Error('Erro ao buscar categorias cadastradas')
+    return response.json()
+}
+
+
+// async function getBuscarCategorias(id) {
+//     const response = await fetch(BASE_URL)
+// }
+
+
+async function putCategoria(id){
+    const options = {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    }
+
+    const response = await fetch(`${BASE_URL}/${id}`, options)
+    if(!response.ok) throw new Error('Erro ao atualizar a categoria')
+
+    return response.json()
+}
+
+
+async function deleteCategoria(id){
+    const options = {
+        method: 'DELETE'
+    }
+
+    const response = await fetch(`${BASE_URL}/${id}`, options)
+    if(!response.ok) throw new Error('Erro ao deletar a categoria')
 }
